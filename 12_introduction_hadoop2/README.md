@@ -6,11 +6,8 @@
 ### [What is short circuit read?](http://www.openkb.info/2014/06/what-is-short-circuit-local-reads.html)
 * 기존의 파일읽기는 항상 DataTransferProtocol을 통해 데이터노드의 TCP 통신이 발생한다
 ![short-circuit-read-1.png](images/short-circuit-read-1.png)
-* 최초 접근 시에는 GetBlockLocalPathInfo를 통해 블록의 위치를 조회하고 이후부터는 로컬파일을 직접 읽고, 쓸 수 있게 된다. 다만 SSH 인증을 받은 계정만 사용할 수 있다 [HDFS-2246]
-![short-circuit-read-2.png](images/short-circuit-read-2.png)
-* 안전한 쇼트서킷 읽기
-![short-circuit-read-3.png](images/short-circuit-read-3.png)
 
+* 최초 접근 시에는 GetBlockLocalPathInfo를 통해 블록의 위치를 조회하고 이후부터는 로컬파일을 직접 읽고, 쓸 수 있게 된다. 다만 SSH 인증을 받은 계정만 사용할 수 있다 [HDFS-2246]
 ```hdfs-site.xml
 <property>
     <name>dfs.client.read.shortcircuit</name>
@@ -30,6 +27,9 @@
     <description>If this configuration parameter is set, short-circuit local reads will skip checksums. This is normally not recommended, but it may be useful for special setups. You might consider using this if you are doing your own checksumming outside of HDFS.</description>
 </property>
 ```
+![short-circuit-read-2.png](images/short-circuit-read-2.png)
+
+* 안전한 쇼트서킷 읽기
 ```hdfs-site.xml
 <property>
   <name>dfs.client.read.shortcircuit</name>
@@ -66,3 +66,5 @@
   </description>
 <property>
 ```
+![short-circuit-read-3.png](images/short-circuit-read-3.png)
+
