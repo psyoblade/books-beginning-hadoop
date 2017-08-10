@@ -6,11 +6,62 @@
 ### [What is short circuit read?](http://www.openkb.info/2014/06/what-is-short-circuit-local-reads.html)
 * 기존의 파일읽기는 항상 DataTransferProtocol을 통해 데이터노드의 TCP 통신이 발생한다
 ![short-circuit-read-1.png](images/short-circuit-read-1.png)
-* 최초 접근 시에는 GetBlockLocalPathInfo를 통해 블록의 위치를 조회하고 이후부터는 로컬파일을 직접 읽고, 쓸 수 있게 된다
+* 최초 접근 시에는 GetBlockLocalPathInfo를 통해 블록의 위치를 조회하고 이후부터는 로컬파일을 직접 읽고, 쓸 수 있게 된다. 다만 SSH 인증을 받은 계정만 사용할 수 있다 [HDFS-2246]
 ![short-circuit-read-2.png](images/short-circuit-read-2.png)
 ```hdfs-site.xml
-    dfs.block.local-path-access.user:           gpadmin,hdfs,mapred,yarn,hbase,hive
-    dfs.client.read.shortcircuit:               true
-    dfs.client.read.shortcircuit.skip.checksum: false
-    dfs.domain.socket.path
+<property>
+    <name>dfs.client.read.shortcircuit</name>
+    <value>true</value>
+    <description>This configuration parameter turns on short-circuit local reads.</description>
+</property>
+
+<property>
+    <name>dfs.block.local-path-access.user</name>
+    <value>gpadmin,hdfs,mapred,yarn,hbase,hive</value>
+    <description>User that can use the shortcut</description>
+</property>
+
+<property>
+    <name>dfs.client.read.shortcircuit.skip.checksum</name>
+    <value>false</value>
+    <description>If this configuration parameter is set, short-circuit local reads will skip checksums. This is normally not recommended, but it may be useful for special setups. You might consider using this if you are doing your own checksumming outside of HDFS.</description>
+</property>
+```
+* 안전한 쇼트서킷 읽기
+![short-circuit-read-3.png](images/short-circuit-read-3.png)
+```hdfs-site.xml
+<property>
+  <name>dfs.client.read.shortcircuit</name>
+  <value>true</value>
+  <description>
+    This configuration parameter turns on short-circuit local reads.
+  </description>
+</property>
+
+<property>
+  <name>dfs.domain.socket.path</name>
+  <value>/home/stack/sockets/short_circuit_read_socket_PORT</value>
+  <description>
+    Optional.  This is a path to a UNIX domain socket that will be used for
+    communication between the DataNode and local HDFS clients.
+    If the string "_PORT" is present in this path, it will be replaced by the
+    TCP port of the DataNode.
+  </description>
+</property>
+
+<property>
+  <name>dfs.client.read.shortcircuit.streams.cache.size</name>
+  <value>256</value>
+  <description>
+    The DFSClient maintains a cache of recently opened file descriptors. This parameter controls the size of that cache. Setting this higher will use more file descriptors, but potentially provide better performance on workloads involving lots of seeks.
+  </description>
+<property>
+
+<property>
+  <name>dfs.client.read.shortcircuit.streams.cache.expiry.ms</name>
+  <value>300000</value>
+  <description>
+    This controls the minimum amount of time file descriptors need to sit in the FileInputStreamCache before they can be closed for being inactive for too long.
+  </description>
+<property>
 ```
